@@ -35,24 +35,38 @@ struct AcknowledgmentsGenerator {
 
     func generate(packageDirectory: String, outputPath: String, pluginWorkDirectory: String?) throws {
         let pins = parsePackageResolved(in: packageDirectory)
+        fputs("HavenAcknowledgments: Found \(pins.count) packages in Package.resolved\n", stderr)
+
         let checkoutsURL = findCheckoutsDirectory(
             packageDirectory: packageDirectory,
             pluginWorkDirectory: pluginWorkDirectory
         )
 
-        // Build acknowledgments from resolved packages that have a license file
-        var acknowledgments: [Acknowledgment] = pins.compactMap { pin in
-            guard let checkoutsURL else { return nil }
+        var acknowledgments: [Acknowledgment] = []
 
-            let packageDir = checkoutsURL.appendingPathComponent(pin.identity)
-            guard let licenseInfo = readLicense(in: packageDir) else { return nil }
+        for pin in pins {
+            let displayName = deriveDisplayName(from: pin)
 
-            return Acknowledgment(
-                name: deriveDisplayName(from: pin),
-                licenseText: licenseInfo.text,
-                url: pin.location,
-                licenseType: licenseInfo.type
-            )
+            if let checkoutsURL {
+                // Checkouts available — only include packages that have a LICENSE file
+                let packageDir = checkoutsURL.appendingPathComponent(pin.identity)
+                if let licenseInfo = readLicense(in: packageDir) {
+                    acknowledgments.append(Acknowledgment(
+                        name: displayName,
+                        licenseText: licenseInfo.text,
+                        url: pin.location,
+                        licenseType: licenseInfo.type
+                    ))
+                }
+            } else {
+                // Checkouts not found — include all packages with unknown license as fallback
+                acknowledgments.append(Acknowledgment(
+                    name: displayName,
+                    licenseText: "",
+                    url: pin.location,
+                    licenseType: .unknown
+                ))
+            }
         }
 
         // Merge with any manually provided licenses from a Licenses/ directory
@@ -61,6 +75,8 @@ struct AcknowledgmentsGenerator {
         for entry in manualEntries where !existingKeys.contains(entry.name.lowercased()) {
             acknowledgments.append(entry)
         }
+
+        fputs("HavenAcknowledgments: Generated \(acknowledgments.count) acknowledgments\n", stderr)
 
         let manifest = AcknowledgmentsManifest(
             acknowledgments: acknowledgments.sorted {
@@ -167,15 +183,18 @@ struct AcknowledgmentsGenerator {
             .appendingPathComponent(".build")
             .appendingPathComponent("checkouts")
         if fm.fileExists(atPath: spmCheckouts.path) {
+            fputs("HavenAcknowledgments: Found checkouts at \(spmCheckouts.path)\n", stderr)
             return spmCheckouts
         }
 
         // Xcode: search upward from the plugin work directory for a checkouts/ sibling
         if let pluginWorkDir = pluginWorkDirectory {
+            fputs("HavenAcknowledgments: Searching for checkouts from plugin work dir: \(pluginWorkDir)\n", stderr)
             var current = URL(fileURLWithPath: pluginWorkDir)
-            for _ in 0..<10 {
+            for _ in 0..<15 {
                 let checkouts = current.appendingPathComponent("checkouts")
                 if fm.fileExists(atPath: checkouts.path) {
+                    fputs("HavenAcknowledgments: Found checkouts at \(checkouts.path)\n", stderr)
                     return checkouts
                 }
                 let parent = current.deletingLastPathComponent()
@@ -184,6 +203,26 @@ struct AcknowledgmentsGenerator {
             }
         }
 
+        // Also search upward from the package directory for SourcePackages/checkouts
+        var searchDir = URL(fileURLWithPath: packageDirectory)
+        for _ in 0..<5 {
+            let sourcePackagesCheckouts = searchDir
+                .appendingPathComponent("SourcePackages")
+                .appendingPathComponent("checkouts")
+            if fm.fileExists(atPath: sourcePackagesCheckouts.path) {
+                fputs("HavenAcknowledgments: Found checkouts at \(sourcePackagesCheckouts.path)\n", stderr)
+                return sourcePackagesCheckouts
+            }
+            let parent = searchDir.deletingLastPathComponent()
+            if parent.path == searchDir.path { break }
+            searchDir = parent
+        }
+
+        fputs("HavenAcknowledgments: Could not find checkouts directory\n", stderr)
+        fputs("  Searched .build/checkouts/ at: \(packageDirectory)\n", stderr)
+        if let pwd = pluginWorkDirectory {
+            fputs("  Searched upward from: \(pwd)\n", stderr)
+        }
         return nil
     }
 
