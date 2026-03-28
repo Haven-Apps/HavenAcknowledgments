@@ -187,35 +187,31 @@ struct AcknowledgmentsGenerator {
             return spmCheckouts
         }
 
-        // Xcode: search upward from the plugin work directory for a checkouts/ sibling
+        // Xcode: search upward from the plugin work directory.
+        // Check both `checkouts/` (SPM structure) and `SourcePackages/checkouts/` (DerivedData structure)
+        // at each level, since the plugin work dir may be under Build/Intermediates.noindex/
         if let pluginWorkDir = pluginWorkDirectory {
             fputs("HavenAcknowledgments: Searching for checkouts from plugin work dir: \(pluginWorkDir)\n", stderr)
             var current = URL(fileURLWithPath: pluginWorkDir)
             for _ in 0..<15 {
-                let checkouts = current.appendingPathComponent("checkouts")
-                if fm.fileExists(atPath: checkouts.path) {
-                    fputs("HavenAcknowledgments: Found checkouts at \(checkouts.path)\n", stderr)
-                    return checkouts
+                // Direct child: <dir>/checkouts/
+                let directCheckouts = current.appendingPathComponent("checkouts")
+                if fm.fileExists(atPath: directCheckouts.path) {
+                    fputs("HavenAcknowledgments: Found checkouts at \(directCheckouts.path)\n", stderr)
+                    return directCheckouts
+                }
+                // Xcode DerivedData: <dir>/SourcePackages/checkouts/
+                let sourcePackagesCheckouts = current
+                    .appendingPathComponent("SourcePackages")
+                    .appendingPathComponent("checkouts")
+                if fm.fileExists(atPath: sourcePackagesCheckouts.path) {
+                    fputs("HavenAcknowledgments: Found checkouts at \(sourcePackagesCheckouts.path)\n", stderr)
+                    return sourcePackagesCheckouts
                 }
                 let parent = current.deletingLastPathComponent()
                 if parent.path == current.path { break }
                 current = parent
             }
-        }
-
-        // Also search upward from the package directory for SourcePackages/checkouts
-        var searchDir = URL(fileURLWithPath: packageDirectory)
-        for _ in 0..<5 {
-            let sourcePackagesCheckouts = searchDir
-                .appendingPathComponent("SourcePackages")
-                .appendingPathComponent("checkouts")
-            if fm.fileExists(atPath: sourcePackagesCheckouts.path) {
-                fputs("HavenAcknowledgments: Found checkouts at \(sourcePackagesCheckouts.path)\n", stderr)
-                return sourcePackagesCheckouts
-            }
-            let parent = searchDir.deletingLastPathComponent()
-            if parent.path == searchDir.path { break }
-            searchDir = parent
         }
 
         fputs("HavenAcknowledgments: Could not find checkouts directory\n", stderr)
