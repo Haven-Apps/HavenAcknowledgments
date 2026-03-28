@@ -22,19 +22,48 @@ struct AcknowledgmentsGenerator {
         }
     }
 
+    /// Common license file names to search for in package checkouts.
+    private let licenseFileNames = [
+        "LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE.rst",
+        "LICENCE", "LICENCE.md", "LICENCE.txt",
+        "License", "License.md", "License.txt",
+        "license", "license.md", "license.txt",
+        "COPYING", "COPYING.md", "COPYING.txt",
+    ]
+
     // MARK: - Generation
 
-    func generate(packageDirectory: String, outputPath: String) throws {
-        let resolvedEntries = scanPackageResolved(in: packageDirectory)
-        let licenseEntries = scanLicensesDirectory(in: packageDirectory)
-
-        let merged = mergeEntries(
-            resolvedEntries: resolvedEntries,
-            licenseEntries: licenseEntries
+    func generate(packageDirectory: String, outputPath: String, pluginWorkDirectory: String?) throws {
+        let pins = parsePackageResolved(in: packageDirectory)
+        let checkoutsURL = findCheckoutsDirectory(
+            packageDirectory: packageDirectory,
+            pluginWorkDirectory: pluginWorkDirectory
         )
 
+        // Build acknowledgments from resolved packages that have a license file
+        var acknowledgments: [Acknowledgment] = pins.compactMap { pin in
+            guard let checkoutsURL else { return nil }
+
+            let packageDir = checkoutsURL.appendingPathComponent(pin.identity)
+            guard let licenseInfo = readLicense(in: packageDir) else { return nil }
+
+            return Acknowledgment(
+                name: deriveDisplayName(from: pin),
+                licenseText: licenseInfo.text,
+                url: pin.location,
+                licenseType: licenseInfo.type
+            )
+        }
+
+        // Merge with any manually provided licenses from a Licenses/ directory
+        let manualEntries = scanLicensesDirectory(in: packageDirectory)
+        let existingKeys = Set(acknowledgments.map { $0.name.lowercased() })
+        for entry in manualEntries where !existingKeys.contains(entry.name.lowercased()) {
+            acknowledgments.append(entry)
+        }
+
         let manifest = AcknowledgmentsManifest(
-            acknowledgments: merged.sorted {
+            acknowledgments: acknowledgments.sorted {
                 $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
             }
         )
@@ -47,30 +76,15 @@ struct AcknowledgmentsGenerator {
         try data.write(to: outputURL)
     }
 
-    // MARK: - Package.resolved Scanning
+    // MARK: - Package.resolved Parsing
 
-    private func scanPackageResolved(in directory: String) -> [Acknowledgment] {
+    private func parsePackageResolved(in directory: String) -> [ResolvedPackage.Pin] {
         let directoryURL = URL(fileURLWithPath: directory)
-        let data: Data? = findPackageResolved(in: directoryURL)
-
-        guard let data,
+        guard let data = findPackageResolved(in: directoryURL),
               let resolved = try? JSONDecoder().decode(ResolvedPackage.self, from: data) else {
             return []
         }
-
-        return resolved.pins.map { pin in
-            let displayName = pin.identity
-                .split(separator: "-")
-                .map { $0.prefix(1).uppercased() + $0.dropFirst() }
-                .joined(separator: " ")
-
-            return Acknowledgment(
-                name: displayName,
-                licenseText: "",
-                url: pin.location,
-                licenseType: .unknown
-            )
-        }
+        return resolved.pins
     }
 
     /// Searches for Package.resolved in common locations:
@@ -116,6 +130,76 @@ struct AcknowledgmentsGenerator {
         return nil
     }
 
+    // MARK: - Display Name
+
+    /// Derives a human-readable display name from the package pin.
+    /// Prefers the repository URL's last path component (which preserves original casing)
+    /// over the lowercased identity field.
+    private func deriveDisplayName(from pin: ResolvedPackage.Pin) -> String {
+        if let url = URL(string: pin.location) {
+            let repoName = url.deletingPathExtension().lastPathComponent
+            if !repoName.isEmpty {
+                if repoName.contains("-") {
+                    return repoName
+                        .split(separator: "-")
+                        .map { $0.prefix(1).uppercased() + $0.dropFirst() }
+                        .joined(separator: " ")
+                }
+                return repoName
+            }
+        }
+
+        // Fallback to identity-based name
+        return pin.identity
+            .split(separator: "-")
+            .map { $0.prefix(1).uppercased() + $0.dropFirst() }
+            .joined(separator: " ")
+    }
+
+    // MARK: - Checkouts Discovery
+
+    /// Finds the SPM checkouts directory by searching common locations.
+    private func findCheckoutsDirectory(packageDirectory: String, pluginWorkDirectory: String?) -> URL? {
+        let fm = FileManager.default
+
+        // SPM CLI: .build/checkouts/
+        let spmCheckouts = URL(fileURLWithPath: packageDirectory)
+            .appendingPathComponent(".build")
+            .appendingPathComponent("checkouts")
+        if fm.fileExists(atPath: spmCheckouts.path) {
+            return spmCheckouts
+        }
+
+        // Xcode: search upward from the plugin work directory for a checkouts/ sibling
+        if let pluginWorkDir = pluginWorkDirectory {
+            var current = URL(fileURLWithPath: pluginWorkDir)
+            for _ in 0..<10 {
+                let checkouts = current.appendingPathComponent("checkouts")
+                if fm.fileExists(atPath: checkouts.path) {
+                    return checkouts
+                }
+                let parent = current.deletingLastPathComponent()
+                if parent.path == current.path { break }
+                current = parent
+            }
+        }
+
+        return nil
+    }
+
+    // MARK: - License File Reading
+
+    /// Reads the license file from a package checkout directory and detects its type.
+    private func readLicense(in directoryURL: URL) -> (text: String, type: License)? {
+        for name in licenseFileNames {
+            let fileURL = directoryURL.appendingPathComponent(name)
+            if let text = try? String(contentsOf: fileURL, encoding: .utf8), !text.isEmpty {
+                return (text, License.detect(from: text))
+            }
+        }
+        return nil
+    }
+
     // MARK: - Licenses/ Directory Scanning
 
     private func scanLicensesDirectory(in directory: String) -> [Acknowledgment] {
@@ -143,34 +227,5 @@ struct AcknowledgmentsGenerator {
                 licenseType: License.detect(from: text)
             )
         }
-    }
-
-    // MARK: - Merging
-
-    private func mergeEntries(
-        resolvedEntries: [Acknowledgment],
-        licenseEntries: [Acknowledgment]
-    ) -> [Acknowledgment] {
-        var entriesByName: [String: Acknowledgment] = [:]
-
-        for entry in resolvedEntries {
-            entriesByName[entry.name.lowercased()] = entry
-        }
-
-        for entry in licenseEntries {
-            let key = entry.name.lowercased()
-            if let existing = entriesByName[key] {
-                entriesByName[key] = Acknowledgment(
-                    name: existing.name,
-                    licenseText: entry.licenseText,
-                    url: existing.url.isEmpty ? entry.url : existing.url,
-                    licenseType: entry.licenseType
-                )
-            } else {
-                entriesByName[key] = entry
-            }
-        }
-
-        return Array(entriesByName.values)
     }
 }

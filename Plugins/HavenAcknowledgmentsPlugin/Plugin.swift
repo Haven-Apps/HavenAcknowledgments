@@ -14,6 +14,7 @@ struct AcknowledgmentsPlugin: BuildToolPlugin {
                 arguments: [
                     context.package.directoryURL.path(),
                     outputPath.path(),
+                    context.pluginWorkDirectoryURL.path(),
                 ],
                 inputFiles: [
                     context.package.directoryURL.appending(path: "Package.resolved"),
@@ -40,6 +41,7 @@ extension AcknowledgmentsPlugin: XcodeBuildToolPlugin {
                 arguments: [
                     context.xcodeProject.directoryURL.path(),
                     outputPath.path(),
+                    context.pluginWorkDirectoryURL.path(),
                 ],
                 outputFiles: [outputPath]
             ),

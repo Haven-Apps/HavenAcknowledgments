@@ -6,14 +6,19 @@ struct GeneratorMain {
         let arguments = CommandLine.arguments
 
         guard arguments.count >= 3 else {
-            fputs("Usage: AcknowledgmentsGeneratorTool <package-directory> <output-path>\n", stderr)
+            fputs("Usage: AcknowledgmentsGeneratorTool <package-directory> <output-path> [plugin-work-directory]\n", stderr)
             throw GeneratorError.invalidArguments
         }
 
         let packageDirectory = arguments[1]
         let outputPath = arguments[2]
+        let pluginWorkDirectory = arguments.count >= 4 ? arguments[3] : nil
 
         let generator = AcknowledgmentsGenerator()
-        try generator.generate(packageDirectory: packageDirectory, outputPath: outputPath)
+        try generator.generate(
+            packageDirectory: packageDirectory,
+            outputPath: outputPath,
+            pluginWorkDirectory: pluginWorkDirectory
+        )
     }
 }

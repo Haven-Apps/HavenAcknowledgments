@@ -13,7 +13,7 @@ public struct AcknowledgmentsNavigationView: View {
     public var body: some View {
         #if os(macOS)
         NavigationSplitView {
-            AcknowledgmentsListView(loader: loader)
+            AcknowledgmentsListView(loader: loader, selectedAcknowledgment: $selectedAcknowledgment)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 280)
         } detail: {
             if let selected = selectedAcknowledgment {
@@ -31,9 +31,6 @@ public struct AcknowledgmentsNavigationView: View {
         NavigationStack {
             AcknowledgmentsListView(loader: loader)
                 .navigationTitle("Acknowledgments")
-                .navigationDestination(for: Acknowledgment.self) { acknowledgment in
-                    LicenseDetailView(acknowledgment: acknowledgment)
-                }
         }
         #endif
     }
