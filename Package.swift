@@ -1,26 +1,49 @@
 // swift-tools-version: 6.3
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "HavenAcknowledgments",
+    platforms: [
+        .iOS(.v26),
+        .macOS(.v26),
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "HavenAcknowledgments",
             targets: ["HavenAcknowledgments"]
         ),
+        .library(
+            name: "HavenAcknowledgmentsCore",
+            targets: ["HavenAcknowledgmentsCore"]
+        ),
+        .plugin(
+            name: "HavenAcknowledgmentsPlugin",
+            targets: ["HavenAcknowledgmentsPlugin"]
+        ),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "HavenAcknowledgments"
+            name: "HavenAcknowledgmentsCore"
+        ),
+        .target(
+            name: "HavenAcknowledgments",
+            dependencies: ["HavenAcknowledgmentsCore"]
+        ),
+        .executableTarget(
+            name: "AcknowledgmentsGeneratorTool",
+            dependencies: ["HavenAcknowledgmentsCore"]
+        ),
+        .plugin(
+            name: "HavenAcknowledgmentsPlugin",
+            capability: .buildTool(),
+            dependencies: [
+                .target(name: "AcknowledgmentsGeneratorTool"),
+            ]
         ),
         .testTarget(
             name: "HavenAcknowledgmentsTests",
-            dependencies: ["HavenAcknowledgments"]
+            dependencies: ["HavenAcknowledgments", "HavenAcknowledgmentsCore"]
         ),
     ],
     swiftLanguageModes: [.v6]
