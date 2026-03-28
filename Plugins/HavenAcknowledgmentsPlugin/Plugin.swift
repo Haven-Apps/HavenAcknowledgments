@@ -8,14 +8,17 @@ struct AcknowledgmentsPlugin: BuildToolPlugin {
             .appending(path: "Acknowledgments.json")
 
         return [
-            .prebuildCommand(
+            .buildCommand(
                 displayName: "Generate Acknowledgments Manifest",
                 executable: tool.url,
                 arguments: [
                     context.package.directoryURL.path(),
                     outputPath.path(),
                 ],
-                outputFilesDirectory: context.pluginWorkDirectoryURL
+                inputFiles: [
+                    context.package.directoryURL.appending(path: "Package.resolved"),
+                ],
+                outputFiles: [outputPath]
             ),
         ]
     }
@@ -31,14 +34,14 @@ extension AcknowledgmentsPlugin: XcodeBuildToolPlugin {
             .appending(path: "Acknowledgments.json")
 
         return [
-            .prebuildCommand(
+            .buildCommand(
                 displayName: "Generate Acknowledgments Manifest",
                 executable: tool.url,
                 arguments: [
                     context.xcodeProject.directoryURL.path(),
                     outputPath.path(),
                 ],
-                outputFilesDirectory: context.pluginWorkDirectoryURL
+                outputFiles: [outputPath]
             ),
         ]
     }
