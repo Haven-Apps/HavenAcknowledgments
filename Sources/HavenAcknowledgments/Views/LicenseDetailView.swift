@@ -52,10 +52,17 @@ public struct LicenseDetailView: View {
             } description: {
                 Text("License text was not included in the manifest.")
             }
+        } else if let markdown = try? AttributedString(
+            markdown: acknowledgment.licenseText,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        ) {
+            Text(markdown)
+                .font(.caption)
+                .textSelection(.enabled)
+                .accessibilityLabel("License text for \(acknowledgment.name)")
         } else {
             Text(acknowledgment.licenseText)
                 .font(.caption)
-                .monospaced()
                 .textSelection(.enabled)
                 .accessibilityLabel("License text for \(acknowledgment.name)")
         }
