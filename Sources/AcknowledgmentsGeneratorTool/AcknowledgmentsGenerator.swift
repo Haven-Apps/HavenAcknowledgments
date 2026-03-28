@@ -50,10 +50,10 @@ struct AcknowledgmentsGenerator {
     // MARK: - Package.resolved Scanning
 
     private func scanPackageResolved(in directory: String) -> [Acknowledgment] {
-        let resolvedURL = URL(fileURLWithPath: directory)
-            .appendingPathComponent("Package.resolved")
+        let directoryURL = URL(fileURLWithPath: directory)
+        let data: Data? = findPackageResolved(in: directoryURL)
 
-        guard let data = try? Data(contentsOf: resolvedURL),
+        guard let data,
               let resolved = try? JSONDecoder().decode(ResolvedPackage.self, from: data) else {
             return []
         }
@@ -71,6 +71,49 @@ struct AcknowledgmentsGenerator {
                 licenseType: .unknown
             )
         }
+    }
+
+    /// Searches for Package.resolved in common locations:
+    /// 1. SPM package root: `<dir>/Package.resolved`
+    /// 2. Xcode project: `<dir>/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
+    /// 3. Xcode workspace: `<dir>/*.xcworkspace/xcshareddata/swiftpm/Package.resolved`
+    private func findPackageResolved(in directoryURL: URL) -> Data? {
+        // SPM package root
+        let spmPath = directoryURL.appendingPathComponent("Package.resolved")
+        if let data = try? Data(contentsOf: spmPath) {
+            return data
+        }
+
+        let fm = FileManager.default
+        let contents = (try? fm.contentsOfDirectory(
+            at: directoryURL,
+            includingPropertiesForKeys: nil
+        )) ?? []
+
+        // Xcode project bundle
+        for item in contents where item.pathExtension == "xcodeproj" {
+            let resolvedURL = item
+                .appendingPathComponent("project.xcworkspace")
+                .appendingPathComponent("xcshareddata")
+                .appendingPathComponent("swiftpm")
+                .appendingPathComponent("Package.resolved")
+            if let data = try? Data(contentsOf: resolvedURL) {
+                return data
+            }
+        }
+
+        // Xcode workspace bundle
+        for item in contents where item.pathExtension == "xcworkspace" {
+            let resolvedURL = item
+                .appendingPathComponent("xcshareddata")
+                .appendingPathComponent("swiftpm")
+                .appendingPathComponent("Package.resolved")
+            if let data = try? Data(contentsOf: resolvedURL) {
+                return data
+            }
+        }
+
+        return nil
     }
 
     // MARK: - Licenses/ Directory Scanning
