@@ -8,9 +8,9 @@ public enum AcknowledgmentsLoadError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .manifestNotFound(let name):
-            return "Acknowledgments manifest '\(name).json' not found in bundle."
+            return String(localized: "error.manifestNotFound \(name)", bundle: .module)
         case .decodingFailed(let reason):
-            return "Failed to decode acknowledgments manifest: \(reason)"
+            return String(localized: "error.decodingFailed \(reason)", bundle: .module)
         }
     }
 }

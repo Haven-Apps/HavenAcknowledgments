@@ -16,11 +16,15 @@ public struct AcknowledgmentsListView: View {
         Group {
             if loader.isLoading {
                 ProgressView {
-                    Text("Loading acknowledgments…")
+                    Text("loading.message", bundle: .module)
                 }
             } else if let errorMessage = loader.errorMessage {
                 ContentUnavailableView {
-                    Label("Unable to Load", systemImage: "exclamationmark.triangle")
+                    Label {
+                        Text("error.unableToLoad", bundle: .module)
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle")
+                    }
                 } description: {
                     Text(errorMessage)
                 }
@@ -28,15 +32,19 @@ public struct AcknowledgmentsListView: View {
                 ContentUnavailableView.search(text: searchText)
             } else if loader.acknowledgments.isEmpty {
                 ContentUnavailableView {
-                    Label("No Acknowledgments", systemImage: "doc.text")
+                    Label {
+                        Text("empty.noAcknowledgments", bundle: .module)
+                    } icon: {
+                        Image(systemName: "doc.text")
+                    }
                 } description: {
-                    Text("No third-party licenses found.")
+                    Text("empty.noLicensesFound", bundle: .module)
                 }
             } else {
                 acknowledgmentsList
             }
         }
-        .searchable(text: $searchText, prompt: "Search acknowledgments")
+        .searchable(text: $searchText, prompt: Text("search.prompt", bundle: .module))
         .task {
             if loader.acknowledgments.isEmpty {
                 await loader.load()
@@ -50,7 +58,7 @@ public struct AcknowledgmentsListView: View {
         List(filteredAcknowledgments, selection: $selectedAcknowledgment) { acknowledgment in
             AcknowledgmentRow(acknowledgment: acknowledgment)
                 .tag(acknowledgment)
-                .accessibilityHint("Shows the full license for \(acknowledgment.name)")
+                .accessibilityHint(Text("accessibility.showsLicenseFor \(acknowledgment.name)", bundle: .module))
         }
         #else
         List(filteredAcknowledgments) { acknowledgment in
@@ -59,7 +67,7 @@ public struct AcknowledgmentsListView: View {
             } label: {
                 AcknowledgmentRow(acknowledgment: acknowledgment)
             }
-            .accessibilityHint("Shows the full license for \(acknowledgment.name)")
+            .accessibilityHint(Text("accessibility.showsLicenseFor \(acknowledgment.name)", bundle: .module))
         }
         #endif
     }

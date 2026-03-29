@@ -36,10 +36,14 @@ public struct LicenseDetailView: View {
                 Button {
                     openURL(packageURL)
                 } label: {
-                    Label("View Repository", systemImage: "link")
-                        .font(.subheadline)
+                    Label {
+                        Text("detail.viewRepository", bundle: .module)
+                    } icon: {
+                        Image(systemName: "link")
+                    }
+                    .font(.subheadline)
                 }
-                .accessibilityHint("Opens the package repository in your browser")
+                .accessibilityHint(Text("accessibility.opensRepository", bundle: .module))
             }
         }
     }
@@ -48,9 +52,13 @@ public struct LicenseDetailView: View {
     private var licenseTextSection: some View {
         if acknowledgment.licenseText.isEmpty {
             ContentUnavailableView {
-                Label("No License Text", systemImage: "doc.text")
+                Label {
+                    Text("detail.noLicenseText", bundle: .module)
+                } icon: {
+                    Image(systemName: "doc.text")
+                }
             } description: {
-                Text("License text was not included in the manifest.")
+                Text("detail.noLicenseTextDescription", bundle: .module)
             }
         } else if let markdown = try? AttributedString(
             markdown: acknowledgment.licenseText,
@@ -59,12 +67,12 @@ public struct LicenseDetailView: View {
             Text(markdown)
                 .font(.caption)
                 .textSelection(.enabled)
-                .accessibilityLabel("License text for \(acknowledgment.name)")
+                .accessibilityLabel(Text("accessibility.licenseTextFor \(acknowledgment.name)", bundle: .module))
         } else {
             Text(acknowledgment.licenseText)
                 .font(.caption)
                 .textSelection(.enabled)
-                .accessibilityLabel("License text for \(acknowledgment.name)")
+                .accessibilityLabel(Text("accessibility.licenseTextFor \(acknowledgment.name)", bundle: .module))
         }
     }
 }

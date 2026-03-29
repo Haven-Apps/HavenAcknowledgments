@@ -17,6 +17,6 @@ struct AcknowledgmentRow: View {
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(acknowledgment.name), \(acknowledgment.licenseType.displayName)")
+        .accessibilityLabel(Text("accessibility.acknowledgmentRow \(acknowledgment.name) \(acknowledgment.licenseType.displayName)", bundle: .module))
     }
 }

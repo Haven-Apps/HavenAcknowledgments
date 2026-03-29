@@ -20,17 +20,21 @@ public struct AcknowledgmentsNavigationView: View {
                 LicenseDetailView(acknowledgment: selected)
             } else {
                 ContentUnavailableView {
-                    Label("Select a Package", systemImage: "doc.text")
+                    Label {
+                        Text("placeholder.selectPackage", bundle: .module)
+                    } icon: {
+                        Image(systemName: "doc.text")
+                    }
                 } description: {
-                    Text("Choose a package from the sidebar to view its license.")
+                    Text("placeholder.selectPackageDescription", bundle: .module)
                 }
             }
         }
-        .navigationTitle("Acknowledgments")
+        .navigationTitle(Text("navigation.title", bundle: .module))
         #else
         NavigationStack {
             AcknowledgmentsListView(loader: loader)
-                .navigationTitle("Acknowledgments")
+                .navigationTitle(Text("navigation.title", bundle: .module))
         }
         #endif
     }
