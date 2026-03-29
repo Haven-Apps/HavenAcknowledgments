@@ -28,7 +28,10 @@ let package = Package(
         ),
         .target(
             name: "HavenAcknowledgments",
-            dependencies: ["HavenAcknowledgmentsCore"]
+            dependencies: ["HavenAcknowledgmentsCore"],
+            resources: [
+                .process("Resources"),
+            ]
         ),
         .executableTarget(
             name: "AcknowledgmentsGeneratorTool",
