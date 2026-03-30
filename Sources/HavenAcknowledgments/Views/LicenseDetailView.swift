@@ -1,3 +1,11 @@
+//
+//  LicenseDetailView.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import HavenAcknowledgmentsCore
 import SwiftUI
 
@@ -20,7 +28,7 @@ public struct LicenseDetailView: View {
         }
         .navigationTitle(acknowledgment.name)
         #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.inline)
         #endif
     }
 
@@ -32,7 +40,8 @@ public struct LicenseDetailView: View {
                 .foregroundStyle(.secondary)
 
             if let packageURL = acknowledgment.packageURL,
-               !acknowledgment.url.isEmpty {
+                !acknowledgment.url.isEmpty
+            {
                 Button {
                     openURL(packageURL)
                 } label: {

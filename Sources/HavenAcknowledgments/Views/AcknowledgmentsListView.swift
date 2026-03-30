@@ -1,3 +1,11 @@
+//
+//  AcknowledgmentsListView.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import HavenAcknowledgmentsCore
 import SwiftUI
 
@@ -55,20 +63,20 @@ public struct AcknowledgmentsListView: View {
     @ViewBuilder
     private var acknowledgmentsList: some View {
         #if os(macOS)
-        List(filteredAcknowledgments, selection: $selectedAcknowledgment) { acknowledgment in
-            AcknowledgmentRow(acknowledgment: acknowledgment)
-                .tag(acknowledgment)
-                .accessibilityHint(Text("accessibility.showsLicenseFor \(acknowledgment.name)", bundle: .module))
-        }
-        #else
-        List(filteredAcknowledgments) { acknowledgment in
-            NavigationLink {
-                LicenseDetailView(acknowledgment: acknowledgment)
-            } label: {
+            List(filteredAcknowledgments, selection: $selectedAcknowledgment) { acknowledgment in
                 AcknowledgmentRow(acknowledgment: acknowledgment)
+                    .tag(acknowledgment)
+                    .accessibilityHint(Text("accessibility.showsLicenseFor \(acknowledgment.name)", bundle: .module))
             }
-            .accessibilityHint(Text("accessibility.showsLicenseFor \(acknowledgment.name)", bundle: .module))
-        }
+        #else
+            List(filteredAcknowledgments) { acknowledgment in
+                NavigationLink {
+                    LicenseDetailView(acknowledgment: acknowledgment)
+                } label: {
+                    AcknowledgmentRow(acknowledgment: acknowledgment)
+                }
+                .accessibilityHint(Text("accessibility.showsLicenseFor \(acknowledgment.name)", bundle: .module))
+            }
         #endif
     }
 

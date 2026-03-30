@@ -1,5 +1,14 @@
+//
+//  AcknowledgmentsListViewTests.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import HavenAcknowledgmentsCore
 import Testing
+
 @testable import HavenAcknowledgments
 
 /// Tests for view-related logic and data consistency.

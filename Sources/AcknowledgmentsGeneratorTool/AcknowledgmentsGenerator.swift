@@ -1,3 +1,11 @@
+//
+//  AcknowledgmentsGenerator.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import Foundation
 import HavenAcknowledgmentsCore
 
@@ -51,21 +59,23 @@ struct AcknowledgmentsGenerator {
                 // Checkouts available — only include packages that have a LICENSE file
                 let packageDir = checkoutsURL.appendingPathComponent(pin.identity)
                 if let licenseInfo = readLicense(in: packageDir) {
-                    acknowledgments.append(Acknowledgment(
-                        name: displayName,
-                        licenseText: licenseInfo.text,
-                        url: pin.location,
-                        licenseType: licenseInfo.type
-                    ))
+                    acknowledgments.append(
+                        Acknowledgment(
+                            name: displayName,
+                            licenseText: licenseInfo.text,
+                            url: pin.location,
+                            licenseType: licenseInfo.type
+                        ))
                 }
             } else {
                 // Checkouts not found — include all packages with unknown license as fallback
-                acknowledgments.append(Acknowledgment(
-                    name: displayName,
-                    licenseText: "",
-                    url: pin.location,
-                    licenseType: .unknown
-                ))
+                acknowledgments.append(
+                    Acknowledgment(
+                        name: displayName,
+                        licenseText: "",
+                        url: pin.location,
+                        licenseType: .unknown
+                    ))
             }
         }
 
@@ -97,7 +107,8 @@ struct AcknowledgmentsGenerator {
     private func parsePackageResolved(in directory: String) -> [ResolvedPackage.Pin] {
         let directoryURL = URL(fileURLWithPath: directory)
         guard let data = findPackageResolved(in: directoryURL),
-              let resolved = try? JSONDecoder().decode(ResolvedPackage.self, from: data) else {
+            let resolved = try? JSONDecoder().decode(ResolvedPackage.self, from: data)
+        else {
             return []
         }
         return resolved.pins
@@ -115,14 +126,16 @@ struct AcknowledgmentsGenerator {
         }
 
         let fm = FileManager.default
-        let contents = (try? fm.contentsOfDirectory(
-            at: directoryURL,
-            includingPropertiesForKeys: nil
-        )) ?? []
+        let contents =
+            (try? fm.contentsOfDirectory(
+                at: directoryURL,
+                includingPropertiesForKeys: nil
+            )) ?? []
 
         // Xcode project bundle
         for item in contents where item.pathExtension == "xcodeproj" {
-            let resolvedURL = item
+            let resolvedURL =
+                item
                 .appendingPathComponent("project.xcworkspace")
                 .appendingPathComponent("xcshareddata")
                 .appendingPathComponent("swiftpm")
@@ -134,7 +147,8 @@ struct AcknowledgmentsGenerator {
 
         // Xcode workspace bundle
         for item in contents where item.pathExtension == "xcworkspace" {
-            let resolvedURL = item
+            let resolvedURL =
+                item
                 .appendingPathComponent("xcshareddata")
                 .appendingPathComponent("swiftpm")
                 .appendingPathComponent("Package.resolved")
@@ -156,7 +170,8 @@ struct AcknowledgmentsGenerator {
             let repoName = url.deletingPathExtension().lastPathComponent
             if !repoName.isEmpty {
                 if repoName.contains("-") {
-                    return repoName
+                    return
+                        repoName
                         .split(separator: "-")
                         .map { $0.prefix(1).uppercased() + $0.dropFirst() }
                         .joined(separator: " ")
@@ -201,7 +216,8 @@ struct AcknowledgmentsGenerator {
                     return directCheckouts
                 }
                 // Xcode DerivedData: <dir>/SourcePackages/checkouts/
-                let sourcePackagesCheckouts = current
+                let sourcePackagesCheckouts =
+                    current
                     .appendingPathComponent("SourcePackages")
                     .appendingPathComponent("checkouts")
                 if fm.fileExists(atPath: sourcePackagesCheckouts.path) {
@@ -241,10 +257,12 @@ struct AcknowledgmentsGenerator {
         let licensesURL = URL(fileURLWithPath: directory)
             .appendingPathComponent("Licenses")
 
-        guard let contents = try? FileManager.default.contentsOfDirectory(
-            at: licensesURL,
-            includingPropertiesForKeys: nil
-        ) else {
+        guard
+            let contents = try? FileManager.default.contentsOfDirectory(
+                at: licensesURL,
+                includingPropertiesForKeys: nil
+            )
+        else {
             return []
         }
 

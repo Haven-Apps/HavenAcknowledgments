@@ -1,3 +1,11 @@
+//
+//  AcknowledgmentsNavigationView.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import HavenAcknowledgmentsCore
 import SwiftUI
 
@@ -12,30 +20,30 @@ public struct AcknowledgmentsNavigationView: View {
 
     public var body: some View {
         #if os(macOS)
-        NavigationSplitView {
-            AcknowledgmentsListView(loader: loader, selectedAcknowledgment: $selectedAcknowledgment)
-                .navigationSplitViewColumnWidth(min: 220, ideal: 280)
-        } detail: {
-            if let selected = selectedAcknowledgment {
-                LicenseDetailView(acknowledgment: selected)
-            } else {
-                ContentUnavailableView {
-                    Label {
-                        Text("placeholder.selectPackage", bundle: .module)
-                    } icon: {
-                        Image(systemName: "doc.text")
+            NavigationSplitView {
+                AcknowledgmentsListView(loader: loader, selectedAcknowledgment: $selectedAcknowledgment)
+                    .navigationSplitViewColumnWidth(min: 220, ideal: 280)
+            } detail: {
+                if let selected = selectedAcknowledgment {
+                    LicenseDetailView(acknowledgment: selected)
+                } else {
+                    ContentUnavailableView {
+                        Label {
+                            Text("placeholder.selectPackage", bundle: .module)
+                        } icon: {
+                            Image(systemName: "doc.text")
+                        }
+                    } description: {
+                        Text("placeholder.selectPackageDescription", bundle: .module)
                     }
-                } description: {
-                    Text("placeholder.selectPackageDescription", bundle: .module)
                 }
             }
-        }
-        .navigationTitle(Text("navigation.title", bundle: .module))
+            .navigationTitle(Text("navigation.title", bundle: .module))
         #else
-        NavigationStack {
-            AcknowledgmentsListView(loader: loader)
-                .navigationTitle(Text("navigation.title", bundle: .module))
-        }
+            NavigationStack {
+                AcknowledgmentsListView(loader: loader)
+                    .navigationTitle(Text("navigation.title", bundle: .module))
+            }
         #endif
     }
 }

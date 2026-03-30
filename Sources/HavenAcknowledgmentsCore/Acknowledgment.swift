@@ -1,3 +1,11 @@
+//
+//  Acknowledgment.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import Foundation
 
 /// A single third-party acknowledgment entry containing package metadata and license information.

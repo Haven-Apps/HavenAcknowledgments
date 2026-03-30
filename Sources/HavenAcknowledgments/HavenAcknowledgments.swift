@@ -1,3 +1,11 @@
+//
+//  HavenAcknowledgments.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 @_exported import HavenAcknowledgmentsCore
 import SwiftUI
 

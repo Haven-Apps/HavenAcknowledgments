@@ -1,3 +1,11 @@
+//
+//  AcknowledgmentsSearchableModifier.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import SwiftUI
 
 /// A view modifier that presents acknowledgments in a sheet triggered by the modified view.
@@ -14,8 +22,8 @@ public struct AcknowledgmentsSheetModifier: ViewModifier {
         content.sheet(isPresented: $isPresented) {
             AcknowledgmentsNavigationView(provider: provider)
                 #if os(iOS)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
                 #endif
         }
     }

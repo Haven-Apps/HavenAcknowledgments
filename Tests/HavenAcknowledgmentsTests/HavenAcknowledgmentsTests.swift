@@ -1,6 +1,15 @@
+//
+//  HavenAcknowledgmentsTests.swift
+//  HavenAcknowledgments
+//
+//  Created by HavenApps on 2026-03-28.
+//  BSD-3 License see LICENSE.md
+//
+
 import Foundation
 import HavenAcknowledgmentsCore
 import Testing
+
 @testable import HavenAcknowledgments
 
 /// Tests for `AcknowledgmentsManifest` encoding and decoding.
@@ -10,17 +19,17 @@ struct ManifestTests {
     @Test("Decodes valid JSON manifest")
     func decodesValidManifest() throws {
         let json = """
-        {
-            "acknowledgments": [
-                {
-                    "name": "TestLib",
-                    "licenseText": "MIT License text",
-                    "url": "https://github.com/test/lib",
-                    "licenseType": "MIT"
-                }
-            ]
-        }
-        """
+            {
+                "acknowledgments": [
+                    {
+                        "name": "TestLib",
+                        "licenseText": "MIT License text",
+                        "url": "https://github.com/test/lib",
+                        "licenseType": "MIT"
+                    }
+                ]
+            }
+            """
         let data = Data(json.utf8)
         let manifest = try AcknowledgmentsManifest.decode(from: data)
 
@@ -33,8 +42,8 @@ struct ManifestTests {
     @Test("Decodes empty acknowledgments array")
     func decodesEmptyManifest() throws {
         let json = """
-        { "acknowledgments": [] }
-        """
+            { "acknowledgments": [] }
+            """
         let data = Data(json.utf8)
         let manifest = try AcknowledgmentsManifest.decode(from: data)
 
@@ -44,17 +53,17 @@ struct ManifestTests {
     @Test("Decodes unknown license type as .unknown")
     func decodesUnknownLicenseType() throws {
         let json = """
-        {
-            "acknowledgments": [
-                {
-                    "name": "Foo",
-                    "licenseText": "",
-                    "url": "",
-                    "licenseType": "SomeWeirdLicense"
-                }
-            ]
-        }
-        """
+            {
+                "acknowledgments": [
+                    {
+                        "name": "Foo",
+                        "licenseText": "",
+                        "url": "",
+                        "licenseType": "SomeWeirdLicense"
+                    }
+                ]
+            }
+            """
         let data = Data(json.utf8)
         let manifest = try AcknowledgmentsManifest.decode(from: data)
 
@@ -70,7 +79,7 @@ struct ManifestTests {
                     licenseText: "Some license",
                     url: "https://example.com",
                     licenseType: .apache2
-                ),
+                )
             ]
         )
 
