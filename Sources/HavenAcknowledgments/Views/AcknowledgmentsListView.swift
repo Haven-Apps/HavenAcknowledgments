@@ -9,12 +9,25 @@
 import HavenAcknowledgmentsCore
 import SwiftUI
 
-/// A searchable list displaying all loaded acknowledgments.
+/// A searchable list of all loaded acknowledgments with built-in loading,
+/// error, and empty states.
+///
+/// On iOS the list uses `NavigationLink` to push ``LicenseDetailView``.
+/// On macOS it uses selection binding for use inside a `NavigationSplitView`.
+///
+/// The view automatically calls ``AcknowledgmentsLoader/load()`` when it
+/// first appears if no data has been loaded yet.
 public struct AcknowledgmentsListView: View {
     @Bindable private var loader: AcknowledgmentsLoader
     @State private var searchText = ""
     @Binding var selectedAcknowledgment: Acknowledgment?
 
+    /// Creates a list view driven by the given loader.
+    ///
+    /// - Parameters:
+    ///   - loader: The ``AcknowledgmentsLoader`` that provides the data.
+    ///   - selectedAcknowledgment: A binding to the currently selected
+    ///     acknowledgment (used on macOS for split-view selection).
     public init(loader: AcknowledgmentsLoader, selectedAcknowledgment: Binding<Acknowledgment?> = .constant(nil)) {
         self.loader = loader
         _selectedAcknowledgment = selectedAcknowledgment

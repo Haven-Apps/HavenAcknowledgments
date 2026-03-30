@@ -9,10 +9,21 @@
 import Foundation
 import HavenAcknowledgmentsCore
 
-/// A manifest provider that returns in-memory preview data.
+/// An ``AcknowledgmentsManifestProvider`` that returns in-memory data,
+/// useful for SwiftUI previews and tests.
+///
+/// ```swift
+/// #Preview {
+///     HavenAcknowledgmentsView(provider: PreviewManifestProvider())
+/// }
+/// ```
 public struct PreviewManifestProvider: AcknowledgmentsManifestProvider {
     private let manifest: AcknowledgmentsManifest
 
+    /// Creates a provider with the given manifest.
+    ///
+    /// - Parameter manifest: The manifest to return. Defaults to
+    ///   ``AcknowledgmentsPreviewData/sampleManifest``.
     public init(manifest: AcknowledgmentsManifest = AcknowledgmentsPreviewData.sampleManifest) {
         self.manifest = manifest
     }

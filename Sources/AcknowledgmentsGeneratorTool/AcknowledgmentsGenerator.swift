@@ -9,10 +9,14 @@
 import Foundation
 import HavenAcknowledgmentsCore
 
-/// Core logic for scanning Package.resolved and license files to produce an acknowledgments manifest.
+/// The core engine that scans `Package.resolved` and package checkout
+/// directories to produce an ``AcknowledgmentsManifest`` JSON file.
+///
+/// This type is used by the ``GeneratorMain`` entry point and is invoked
+/// during the build via ``HavenAcknowledgmentsPlugin``.
 struct AcknowledgmentsGenerator {
 
-    /// Model for parsing the SPM `Package.resolved` file format.
+    /// A decodable model matching the SPM `Package.resolved` v2 file format.
     struct ResolvedPackage: Codable {
         let pins: [Pin]
         let version: Int
@@ -30,7 +34,8 @@ struct AcknowledgmentsGenerator {
         }
     }
 
-    /// Common license file names to search for in package checkouts.
+    /// File names checked (in order) when searching for a license in each
+    /// package checkout directory.
     private let licenseFileNames = [
         "LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE.rst",
         "LICENCE", "LICENCE.md", "LICENCE.txt",
@@ -41,6 +46,15 @@ struct AcknowledgmentsGenerator {
 
     // MARK: - Generation
 
+    /// Generates an `Acknowledgments.json` manifest file.
+    ///
+    /// - Parameters:
+    ///   - packageDirectory: The root directory of the Swift package or
+    ///     Xcode project containing `Package.resolved`.
+    ///   - outputPath: The file path where the JSON manifest will be written.
+    ///   - pluginWorkDirectory: The plugin's work directory, used to locate
+    ///     SPM checkouts in Xcode-managed builds. Pass `nil` for CLI builds.
+    /// - Throws: An error if the manifest cannot be encoded or written.
     func generate(packageDirectory: String, outputPath: String, pluginWorkDirectory: String?) throws {
         let pins = parsePackageResolved(in: packageDirectory)
         fputs("HavenAcknowledgments: Found \(pins.count) packages in Package.resolved\n", stderr)

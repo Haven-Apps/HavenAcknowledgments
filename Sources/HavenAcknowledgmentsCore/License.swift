@@ -8,7 +8,47 @@
 
 import Foundation
 
-/// Represents common open-source license types.
+/// An enumeration of common open-source license types identified by their
+/// [SPDX](https://spdx.org/licenses/) identifier.
+///
+/// The library uses `License` to categorize each dependency's licensing terms.
+/// You can also detect a license from its full text using ``detect(from:)``.
+///
+/// ## Topics
+///
+/// ### Permissive Licenses
+/// - ``mit``
+/// - ``mit0``
+/// - ``apache2``
+/// - ``bsd2``
+/// - ``bsd3``
+/// - ``zeroBSD``
+/// - ``isc``
+/// - ``zlib``
+/// - ``boostSoftware``
+/// - ``unlicense``
+/// - ``wtfpl``
+/// - ``blueOak``
+/// - ``postgreSQL``
+///
+/// ### Copyleft Licenses
+/// - ``gpl2``
+/// - ``gpl3``
+/// - ``lgpl2``
+/// - ``lgpl3``
+/// - ``agpl3``
+/// - ``mpl2``
+/// - ``eclipse2``
+/// - ``artistic2``
+///
+/// ### Creative Commons Licenses
+/// - ``creativeCommonsZero``
+/// - ``creativeCommonsBy4``
+/// - ``creativeCommonsBySA4``
+///
+/// ### Other
+/// - ``custom``
+/// - ``unknown``
 public enum License: String, Codable, Sendable, CaseIterable, Identifiable {
     case mit = "MIT"
     case apache2 = "Apache-2.0"
@@ -39,7 +79,10 @@ public enum License: String, Codable, Sendable, CaseIterable, Identifiable {
 
     public var id: String { rawValue }
 
-    /// A human-readable display name for the license.
+    /// A human-readable display name suitable for presentation in the UI.
+    ///
+    /// For example, ``mit`` returns `"MIT License"` and ``apache2`` returns
+    /// `"Apache License 2.0"`.
     public var displayName: String {
         switch self {
         case .mit: return "MIT License"
@@ -71,7 +114,14 @@ public enum License: String, Codable, Sendable, CaseIterable, Identifiable {
         }
     }
 
-    /// Detects the license type from the full text of a license file.
+    /// Detects the license type by scanning the full text of a license file.
+    ///
+    /// The method performs case-insensitive substring matching against known
+    /// license preambles. If no known license is recognized, ``custom`` is
+    /// returned.
+    ///
+    /// - Parameter text: The full contents of a license file.
+    /// - Returns: The detected ``License`` type, or ``custom`` if unrecognized.
     public static func detect(from text: String) -> License {
         let lowered = text.lowercased()
 

@@ -9,11 +9,20 @@
 import HavenAcknowledgmentsCore
 import SwiftUI
 
-/// A detail view showing the full license text and a link to the package repository.
+/// A detail view that displays the full license text for a single package
+/// along with a link to its repository.
+///
+/// The license text is rendered as Markdown when possible, with text
+/// selection enabled. If the license text is empty, a placeholder message
+/// is shown instead.
 public struct LicenseDetailView: View {
+    /// The acknowledgment whose license to display.
     let acknowledgment: Acknowledgment
     @Environment(\.openURL) private var openURL
 
+    /// Creates a detail view for the given acknowledgment.
+    ///
+    /// - Parameter acknowledgment: The acknowledgment entry to display.
     public init(acknowledgment: Acknowledgment) {
         self.acknowledgment = acknowledgment
     }

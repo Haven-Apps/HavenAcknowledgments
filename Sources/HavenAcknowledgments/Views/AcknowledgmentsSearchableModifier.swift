@@ -8,11 +8,20 @@
 
 import SwiftUI
 
-/// A view modifier that presents acknowledgments in a sheet triggered by the modified view.
+/// A view modifier that presents the acknowledgments UI in a modal sheet.
+///
+/// Apply this modifier through the convenience method
+/// ``SwiftUICore/View/acknowledgmentsSheet(isPresented:provider:)``
+/// rather than using it directly.
 public struct AcknowledgmentsSheetModifier: ViewModifier {
     @Binding var isPresented: Bool
     private let provider: AcknowledgmentsManifestProvider
 
+    /// Creates the sheet modifier.
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding that controls whether the sheet is shown.
+    ///   - provider: The manifest provider. Defaults to ``BundleManifestProvider``.
     public init(isPresented: Binding<Bool>, provider: AcknowledgmentsManifestProvider = BundleManifestProvider()) {
         _isPresented = isPresented
         self.provider = provider
@@ -30,7 +39,23 @@ public struct AcknowledgmentsSheetModifier: ViewModifier {
 }
 
 extension View {
-    /// Presents an acknowledgments sheet when `isPresented` is `true`.
+    /// Presents the acknowledgments UI in a sheet.
+    ///
+    /// ```swift
+    /// @State private var showAcknowledgments = false
+    ///
+    /// var body: some View {
+    ///     Button("Acknowledgments") {
+    ///         showAcknowledgments = true
+    ///     }
+    ///     .acknowledgmentsSheet(isPresented: $showAcknowledgments)
+    /// }
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - isPresented: A binding that controls whether the sheet is shown.
+    ///   - provider: The manifest provider. Defaults to ``BundleManifestProvider``.
+    /// - Returns: A view with the acknowledgments sheet attached.
     public func acknowledgmentsSheet(
         isPresented: Binding<Bool>,
         provider: AcknowledgmentsManifestProvider = BundleManifestProvider()

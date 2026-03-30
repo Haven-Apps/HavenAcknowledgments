@@ -9,10 +9,14 @@
 import Foundation
 import HavenAcknowledgmentsCore
 
-/// Sample data for SwiftUI previews and testing.
+/// Sample acknowledgment data for SwiftUI previews and unit tests.
+///
+/// This enum provides ready-made ``Acknowledgment`` arrays and an
+/// ``AcknowledgmentsManifest`` that you can use to populate views
+/// without needing a real `Acknowledgments.json` file.
 public enum AcknowledgmentsPreviewData {
 
-    /// A sample set of acknowledgments for use in previews.
+    /// A curated set of sample acknowledgments covering MIT and Apache licenses.
     public static let sampleAcknowledgments: [Acknowledgment] = [
         Acknowledgment(
             name: "Alamofire",
@@ -46,7 +50,7 @@ public enum AcknowledgmentsPreviewData {
         ),
     ]
 
-    /// A sample manifest wrapping the sample acknowledgments.
+    /// A sample manifest wrapping ``sampleAcknowledgments``.
     public static let sampleManifest = AcknowledgmentsManifest(
         acknowledgments: sampleAcknowledgments
     )

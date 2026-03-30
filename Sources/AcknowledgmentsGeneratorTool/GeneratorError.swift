@@ -8,7 +8,9 @@
 
 import Foundation
 
+/// Errors thrown by the acknowledgments generator command-line tool.
 enum GeneratorError: Error, CustomStringConvertible {
+    /// The required command-line arguments were not provided.
     case invalidArguments
 
     var description: String {

@@ -8,8 +8,15 @@
 
 import Foundation
 
+/// The entry point for the `AcknowledgmentsGeneratorTool` executable.
+///
+/// Usage:
+/// ```
+/// AcknowledgmentsGeneratorTool <package-directory> <output-path> [plugin-work-directory]
+/// ```
 @main
 struct GeneratorMain {
+    /// Parses command-line arguments and runs the generator.
     static func main() throws {
         let arguments = CommandLine.arguments
 

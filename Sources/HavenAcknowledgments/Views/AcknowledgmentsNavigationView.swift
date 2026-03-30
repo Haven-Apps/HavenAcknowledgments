@@ -9,11 +9,23 @@
 import HavenAcknowledgmentsCore
 import SwiftUI
 
-/// A navigation wrapper that provides a NavigationSplitView on macOS and NavigationStack on iOS.
+/// A platform-adaptive navigation container for the acknowledgments UI.
+///
+/// On macOS this uses a `NavigationSplitView` with a sidebar list and
+/// detail pane. On iOS it uses a `NavigationStack` with push navigation.
+///
+/// You rarely need to use this view directly — prefer
+/// ``HavenAcknowledgmentsView`` or the
+/// ``SwiftUICore/View/acknowledgmentsSheet(isPresented:provider:)`` modifier
+/// instead.
 public struct AcknowledgmentsNavigationView: View {
     @State private var loader: AcknowledgmentsLoader
     @State private var selectedAcknowledgment: Acknowledgment?
 
+    /// Creates a navigation view using the given manifest provider.
+    ///
+    /// - Parameter provider: The provider that supplies the acknowledgments
+    ///   manifest. Defaults to ``BundleManifestProvider``.
     public init(provider: AcknowledgmentsManifestProvider = BundleManifestProvider()) {
         _loader = State(initialValue: AcknowledgmentsLoader(provider: provider))
     }

@@ -9,8 +9,12 @@
 import HavenAcknowledgmentsCore
 import SwiftUI
 
-/// A row displaying a single acknowledgment's name and license type.
+/// A list row displaying an acknowledgment's name and license type badge.
+///
+/// This is an internal view used by ``AcknowledgmentsListView`` to render
+/// each entry in the list.
 struct AcknowledgmentRow: View {
+    /// The acknowledgment entry to display.
     let acknowledgment: Acknowledgment
 
     var body: some View {
